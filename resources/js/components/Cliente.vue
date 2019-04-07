@@ -8,8 +8,8 @@
                 <!-- Ejemplo de tabla Listado -->
                 <div class="card">
                     <div class="card-header">
-                        <i class="fa fa-align-justify"></i> Categorías
-                        <button type="button" @click="abrirModal('categoria', 'registrar')" class="btn btn-secondary">
+                        <i class="fa fa-align-justify"></i> Clientes
+                        <button type="button" @click="abrirModal('persona', 'registrar')" class="btn btn-secondary">
                             <i class="icon-plus"></i>&nbsp;Nuevo
                         </button>
                     </div>
@@ -19,10 +19,12 @@
                                 <div class="input-group">
                                     <select class="form-control col-md-3" v-model="criterio">
                                       <option value="nombre">Nombre</option>
-                                      <option value="descripcion">Descripción</option>
+                                      <option value="num_documento">Documento</option>
+                                      <option value="email">Email</option>
+                                      <option value="telefono">Telefono</option>
                                     </select>
-                                    <input type="text" v-model="buscar" @keyup.enter="listarCategoria(1, buscar, criterio)" class="form-control" placeholder="Texto a buscar">
-                                    <button type="submit" @click="listarCategoria(1, buscar, criterio)" class="btn btn-primary"><i class="fa fa-search"></i> Buscar</button>
+                                    <input type="text" v-model="buscar" @keyup.enter="listarPersona(1, buscar, criterio)" class="form-control" placeholder="Texto a buscar">
+                                    <button type="submit" @click="listarPersona(1, buscar, criterio)" class="btn btn-primary"><i class="fa fa-search"></i> Buscar</button>
                                 </div>
                             </div>
                         </div>
@@ -31,38 +33,26 @@
                                 <tr>
                                     <th>Opciones</th>
                                     <th>Nombre</th>
-                                    <th>Descripción</th>
-                                    <th>Estado</th>
+                                    <th>Tipo Documento</th>
+                                    <th>Número</th>
+                                    <th>Dirección</th>
+                                    <th>Teléfono</th>
+                                    <th>Email</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="categoria in arrayCategoria" :key="categoria.id">
+                                <tr v-for="persona in arrayPersona" :key="persona.id">
                                     <td>
-                                        <button type="button" @click="abrirModal('categoria','actualizar', categoria)" class="btn btn-warning btn-sm">
+                                        <button type="button" @click="abrirModal('persona','actualizar', persona)" class="btn btn-warning btn-sm">
                                           <i class="icon-pencil"></i>
                                         </button> &nbsp;
-                                        <template v-if="categoria.condicion">
-                                            <button type="button" class="btn btn-danger btn-sm" @click="desactivarCategoria(categoria.id)">
-                                                <i class="icon-trash"></i>
-                                            </button>
-                                        </template>
-                                        <template v-else>
-                                            <button type="button" class="btn btn-info btn-sm" @click="activarCategoria(categoria.id)">
-                                                <i class="icon-check"></i>
-                                            </button>
-                                        </template>
                                     </td>
-                                    <td v-text="categoria.nombre"></td>
-                                    <td v-text="categoria.descripcion"></td>
-                                    <td>
-                                        <div v-if="categoria.condicion">
-                                            <span class="badge badge-success">Activo</span>    
-                                        </div>
-                                        <div v-else>
-                                            <span class="badge badge-danger">Desactivado</span>    
-                                        </div>
-                                        
-                                    </td>
+                                    <td v-text="persona.nombre"></td>
+                                    <td v-text="persona.tipo_documento"></td>
+                                    <td v-text="persona.num_documento"></td>
+                                    <td v-text="persona.direccion"></td>
+                                    <td v-text="persona.telefono"></td>
+                                    <td v-text="persona.email"></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -132,15 +122,19 @@
     export default {
         data(){
             return {
-                categoria_id : 0,
+                persona_id : 0,
                 nombre: '',
-                descripcion: '',
-                arrayCategoria: [],
+                tipo_documento: 'DNI',
+                num_documento: '',
+                direccion: '',
+                telefono: '',
+                email: '',
+                arrayPersona: [],
                 modal: 0,
                 tituloModal: '',
                 tipoAccion: 0,
-                errorCategoria: 0,
-                errorMostrarMsjCategoria: [],
+                errorPersona: 0,
+                errorMostrarMsjPersona: [],
                 pagination: {
                     'total': 0,
                     'current_page': 0,
@@ -184,12 +178,12 @@
             }
         },
         methods : {
-            listarCategoria (page, buscar, criterio){
+            listarPersona (page, buscar, criterio){
                 let me = this;
-                var url = '/categoria?page=' + page + '&buscar=' + buscar + '&criterio=' + criterio;
+                var url = '/cliente?page=' + page + '&buscar=' + buscar + '&criterio=' + criterio;
                 axios.get(url).then(function (response) {
                     var respuesta = response.data;
-                    me.arrayCategoria = respuesta.categorias.data;
+                    me.arrayPersona = respuesta.personas.data;
                     me.pagination = respuesta.pagination;
                 })
                 .catch(function (error) {
@@ -202,7 +196,7 @@
                 //ACTUALIZAR PAGINA ACTUAL
                 me.pagination.current_page = page;
                 //Envia la peticion para visualizar la data de esa pagina
-                me.listarCategoria(page, buscar, criterio);
+                me.listarPersona(page, buscar, criterio);
             },
             registrarCategoria(){
                 if (this.validarCategoria()) {
@@ -241,92 +235,6 @@
                 .catch(function (error) {
                     console.log(error);
                 });
-            },
-            desactivarCategoria(id){
-              const swalWithBootstrapButtons = Swal.mixin({
-                customClass: {
-                    confirmButton: 'btn btn-success',
-                    cancelButton: 'btn btn-danger'
-                },
-                buttonsStyling: false,
-                })
-
-                swalWithBootstrapButtons.fire({
-                title: 'Estas seguro de desactivar esta categoria?',
-                type: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Aceptar',
-                cancelButtonText: 'Cancelar',
-                reverseButtons: true
-                }).then((result) => {
-                if (result.value) {
-                    let me = this;
-
-                    axios.put('/categoria/desactivar', {
-                        id : id
-                    })
-                    .then(function (response) {
-                        me.listarCategoria(1, '', 'nombre');
-                        swalWithBootstrapButtons.fire(
-                        'Desactivado!',
-                        'El registro ha sido desactivado con éxito.',
-                        'success'
-                        )
-                    })
-                    .catch(function (error) {
-                        console.log(error);
-                    });
-                    
-                } else if (
-                    // Read more about handling dismissals
-                    result.dismiss === Swal.DismissReason.cancel
-                ) {
-                    
-                }
-                })  
-            },
-            activarCategoria(id){
-              const swalWithBootstrapButtons = Swal.mixin({
-                customClass: {
-                    confirmButton: 'btn btn-success',
-                    cancelButton: 'btn btn-danger'
-                },
-                buttonsStyling: false,
-                })
-
-                swalWithBootstrapButtons.fire({
-                title: 'Estas seguro de activar esta categoria?',
-                type: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Aceptar',
-                cancelButtonText: 'Cancelar',
-                reverseButtons: true
-                }).then((result) => {
-                if (result.value) {
-                    let me = this;
-
-                    axios.put('/categoria/activar', {
-                        id : id
-                    })
-                    .then(function (response) {
-                        me.listarCategoria(1, '', 'nombre');
-                        swalWithBootstrapButtons.fire(
-                        'Activado!',
-                        'El registro ha sido activado con éxito.',
-                        'success'
-                        )
-                    })
-                    .catch(function (error) {
-                        console.log(error);
-                    });
-                    
-                } else if (
-                    // Read more about handling dismissals
-                    result.dismiss === Swal.DismissReason.cancel
-                ) {
-                    
-                }
-                })  
             },
             validarCategoria(){
                 this.errorCategoria = 0;
@@ -374,7 +282,7 @@
             }
         },
         mounted() {
-            this.listarCategoria(1, this.buscar, this.criterio);
+            this.listarPersona(1, this.buscar, this.criterio);
             //console.log('Component mounted.')
         }
     }
