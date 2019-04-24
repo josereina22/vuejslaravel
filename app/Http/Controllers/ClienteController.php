@@ -50,7 +50,7 @@ class ClienteController extends Controller
     public function update(Request $request)
     {
         if(!$request->ajax()) return redirect('/');
-        $categoria = Pategoria::findOrFail($request->id); //busco la categoria que se encuentra registrada en la tabla categoria base de datos mediantes el id que recibo del formulario del ob request
+        $persona = Persona::findOrFail($request->id); //busco la categoria que se encuentra registrada en la tabla categoria base de datos mediantes el id que recibo del formulario del ob request
         $persona->nombre = $request->nombre;
         $persona->tipo_documento = $request->tipo_documento;
         $persona->num_documento = $request->num_documento;
